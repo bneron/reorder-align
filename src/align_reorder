@@ -1,0 +1,94 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+
+########################################################################################
+#                                                                                      #
+#    Copyright (C) 2011                                                                #
+#    Author: Bertrand Néron                                                            #
+#    Organization:'Centre Informatique en Biologie', Institut Pasteur, Paris.          #
+#                                                                                      #
+#    This program is free software: you can redistribute it and/or modify              #
+#    it under the terms of the GNU General Public License version as published by      #
+#    the Free Software Foundation, in the version 3 of the License.                    #
+#                                                                                      #
+#    This program is distributed in the hope that it will be useful,                   #
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of                    #
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                     #
+#    GNU General Public License for more details.                                      #
+#                                                                                      #
+#    You should have received a copy of the GNU General Public License                 #
+#    along with this program (Please refer to the COPYING.LIB document).               #
+#    If not, see <http://www.gnu.org/licenses/>.                                       #
+########################################################################################
+
+from optparse import OptionParser
+import sys
+import os.path
+from itertools import groupby
+
+def fasta_iter(fasta_file):
+    """
+    @author: http://biostar.stackexchange.com/users/36/brentp
+    given a fasta file. yield tuples of header, sequence
+    """
+    # ditch the boolean (x[0]) and just keep the header or sequence since
+    # we know they alternate.
+    faiter = (x[1] for x in groupby(fasta_file, lambda line: line[0] == ">"))
+    for header in faiter:
+        # drop the ">"
+        header = header.next()[1:].strip()
+        # join all sequence lines to one.
+        seq = "\n".join(s.strip() for s in faiter.next())
+        yield header, seq
+        
+usage="""
+       %prog [options] fastaRename 
+       reorder an alignment file in fasta format according to
+       a reference sequences file containig the same sequences in fasta format
+"""
+
+parser = OptionParser( usage= usage )       
+parser.add_option( "-a" , "--alignment" ,
+                   action = "store",
+                   type= "string" ,
+                   dest = "aln_file_name" ,
+                   help = "specify the path to alignment file in fasta format")
+parser.add_option( "-s" , "--sequences" ,
+                   action = "store",
+                   type= "string" ,
+                   dest = "seq_file_name" ,
+                   help = "specify the path to sequences file in fasta format")
+parser.add_option( "-o" , "--output" ,
+                       action = "store",
+                       type= "string" ,
+                       dest = "output" ,
+                       help = "specify the file to store the reorder alignment in fasta format")
+
+options, args = parser.parse_args()
+
+if not options.aln_file_name:
+    print >> sys.stderr , "Alignment file is mandatory"
+    parser.print_help(sys.stderr)
+    sys.exit(1)
+if not options.seq_file_name:
+    print >> sys.stderr , "Sequence file is mandatory"
+    parser.print_help(sys.stderr)
+    sys.exit(1)
+
+
+try:
+    with open( options.aln_file_name , 'r') as align_fh:
+        with open( options.seq_file_name , 'r') as seq_fh:
+            with open( options.output , 'w' ) if options.output else sys.stdout as out_fh :
+                align = {}
+                for header , seq in fasta_iter( align_fh ):
+                    align[ header ] = seq
+                for header , seq in fasta_iter( seq_fh ):
+                    if header in align:
+                        out_fh.write( ">%s\n%s\n" %( header , align[ header ] ))
+                    else:
+                        print >> sys.stderr , "Sequence not found in alignment: " , header
+                        sys.exit(2)
+except Exception, err:
+    print >> sys.stderr, err
+    sys.exit(2)
