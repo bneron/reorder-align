@@ -53,14 +53,14 @@ class check_and_build( build ):
 require_pyt = [ 'python (>=2.6, <3.0)' ]
 
 setup(name        = 'align_reorder',
-      version     =  time.strftime("%Y%m%d"),
+      version     = '1.1' ,
       author      = "Néron Bertrand",
       author_email = "bneron@pasteur.fr" ,
-      license      = "GPLv3" ,
+      license      = "BSD3-clause" ,
       description  = """reorder an alignment file in fasta format according to
        a reference sequences file containig the same sequences in fasta format""",
       classifiers = [
-                     'License :: GPLv3' ,
+                     'License :: BSD3-clause' ,
                      'Operating System :: POSIX' ,
                      'Programming Language :: Python' ,
                      'Topic :: Bioinformatics' ,
