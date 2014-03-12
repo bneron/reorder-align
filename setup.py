@@ -53,7 +53,7 @@ class check_and_build( build ):
 require_pyt = [ 'python (>=2.6, <3.0)' ]
 
 setup(name        = 'align_reorder',
-      version     = '1.1' ,
+      version     =  time.strftime("%Y%m%d") ,
       author      = "Néron Bertrand",
       author_email = "bneron@pasteur.fr" ,
       license      = "BSD3-clause" ,
