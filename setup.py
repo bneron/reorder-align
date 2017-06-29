@@ -51,6 +51,7 @@ class check_and_build( build ):
         return True
 
 require_pyt = [ 'python (>=2.6, <3.0)' ]
+require_mod = []
 
 setup(name        = 'align_reorder',
       version     =  time.strftime("%Y%m%d") ,
